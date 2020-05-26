@@ -1,0 +1,148 @@
+<?php
+$qEmail = $_GET['q'];
+$solved = $_POST['solved'];
+
+if (!$qEmail){
+	echo "Erro desconhecido...";
+	die;
+} else {
+	$qEmail = str_replace("","",base64_decode($qEmail));
+	$name=utf8_encode($_GET['name']);
+}
+?>
+<html>
+    <head>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-1.x-git.min.js"></script>
+
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css"/>
+        <style>
+            .badge{ width:100%}
+        </style>
+
+        <script type="text/javascript" src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
+        <script> 
+        $(document).ready(function() {
+                $('#basicDataTable').dataTable( {
+                    stateSave: true,
+                    "lengthMenu": [[10, 20, 50, 100, -1], [10, 20, 50, 100, "Tudo"]],
+                    "order": [[ 2, "desc" ]],
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
+                    }
+                } );
+            } );
+        </script>
+    </head>
+    <body>
+        <div style="margin: 10px">
+            <p><a href="../index.php?a=add&email=<?=$qEmail?>&name=<?=$name?>" class="btn btn-primary btn-lg" target="_chamados">Abrir Chamado</a></p>
+            <!-- <p><a href="<?=$_SERVER[REQUEST_URI]?>&solved=1" class="btn btn-secondary btn-sm">Incluir chamados Resolvidos</a></p> -->
+            
+            
+            
+            <form name="form1" method="post" action="<?=$_SERVER[REQUEST_URI]?>"> 
+                <label><input type="radio" name="solved" <?php if ($solved == 1) { echo "checked value='0'"; } else {echo "value=1"; }  ?> onclick="submit()"> Exibir chamados resolvidos.</label>
+            </form>
+        </div>
+
+        <table  class="table table-striped" id="basicDataTable">
+        <thead>
+            <tr bgcolor='#eeeeee'>
+            <th>Status</th>
+            <th>Categoria</th>
+            <th>Última interação</th><th>ID</th><th>Assunto</th><th>Respondido por</th><th>Mensagem</th><th>Ação</th>
+            </tr>
+        </thead>
+        <tbody>
+        
+
+<?php
+/// CONNECTION AND OPTIONS
+require_once("config.php");
+
+if ($solved != 1){
+	$querySolved = " and tickets.status != 3";
+}
+
+$q = mysqli_query($conn, "SELECT
+	tickets.subject, tickets.trackid, tickets.lastchange, tickets.email,  tickets.status,
+	(select name from hesk_replies as replies where replyto = tickets.id order by replies.id desc limit 1) as name,
+    (select message from hesk_replies as replies where replyto = tickets.id order by replies.id desc limit 1) as message,
+	(select name from hesk_categories as replies where id = category limit 1) as category
+FROM
+hesk_tickets as tickets
+WHERE
+tickets.email='$qEmail' 
+$querySolved
+order by lastchange desc");
+
+while ($d = mysqli_fetch_assoc($q)){
+	$trackid = utf8_encode($d['trackid']);
+	$subject = utf8_encode($d['subject']);
+	$name = utf8_encode($d['name']);
+	$email = utf8_encode($d['email']);
+	$message = utf8_encode($d['message']);
+	$lastchange = utf8_encode($d['lastchange']);
+	$status = utf8_encode($d['status']);
+	$category = utf8_encode($d['category']);
+	
+	switch ($status) {
+    case 0:
+        $statusTxt =  '<span class="badge badge-danger">Novo</span>';
+		$statusOrder = 4;
+        break;
+    case 1:
+        $statusTxt =  '<span class="badge badge-warning">Aguardando resposta</span>';
+		$statusOrder = 2;
+        break;
+    case 2:
+        $statusTxt =  '<span class="badge badge-primary">Respondido</span>';
+		$statusOrder = 0;
+        break;
+	case 3:
+        $statusTxt =  '<span class="badge badge-success">Resolvido</span>';
+		$statusOrder = 5;
+        break;
+    case 4:
+        $statusTxt =  '<span class="badge badge-info">Em progresso</span>';
+		$statusOrder = 1;
+        break;
+    case 5:
+        $statusTxt =  '<span class="badge badge-dark">Em espera</span>';
+		$statusOrder = 3;
+        break;
+	default:
+        $statusTxt =  '<span class="badge badge-dark">Acesse para conferir</span>';
+}
+	
+	$tamanhoMessage = 45;
+	$message = nl2br(substr(strip_tags($message),0,$tamanhoMessage)); 
+	$message = preg_replace('#(( ){0,}<br( {0,})(/{0,1})>){1,}$#i', '', $message); 
+	if (strlen($message)>$tamanhoMessage-1) { $message.='...'; } 
+	
+	
+echo "
+	<tr bgcolor='white'>
+        <td data-order='$statusOrder'>$statusTxt</td>
+		<td>$category</td>
+        <td data-order='$lastchange'>".date("d/m/Y H:i", strtotime("$lastchange"))."</td>
+		<td>$trackid</td>
+        <td>$subject</td>
+        <td>$name</td>
+        <td>$message</td>
+		<td><a href='../ticket.php?track=$trackid&e=$email' class='btn btn-secondary btn-sm' target='_chamados'>Acessar Ticket</a></td>
+    </tr>
+";
+
+}
+mysqli_close($conn);
+?>
+
+            </tbody>
+        </table>
+    </body>
+</html>
