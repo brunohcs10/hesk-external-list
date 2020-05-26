@@ -1,5 +1,5 @@
 # hesk-external-list
-## External list of tickets, using the user's email.
+## EN - External list of tickets, using the user's email.
 
 ### HOW USE
 1. Install in a directory within hesk (Recommended create the directory /list)
@@ -7,8 +7,7 @@
 3. Configure your password in config.php
 
 
-## pt-BR
-## Lista externa de Tickets, usando e-mail do usuário.
+## PT-BR Lista externa de Tickets, usando e-mail do usuário.
 
 ### Como usar
 1. Instale dentro do diretorio do HESK (Recomendo criar o diretório /list)
