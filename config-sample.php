@@ -7,3 +7,7 @@ if (!$conn) {
     echo "Debugging error: " . mysqli_connect_error() . PHP_EOL;
     exit;
 }
+
+
+$lengthMessage = 45; // Message Size
+$solvedIdIs = 3; // Resolved Status ID

@@ -1,13 +1,18 @@
 <?php
-$qEmail = $_GET['q'];
-$solved = $_POST['solved'];
+$qEmail = htmlspecialchars($_GET['q']);
+$qName = htmlspecialchars($_GET['name']);
+$solved = htmlspecialchars($_POST['solved']);
 
-if (!$qEmail){
-	echo "Erro desconhecido...";
+if (!isset($qEmail)){
+    echo "Error";
 	die;
 } else {
-	$qEmail = str_replace("","",base64_decode($qEmail));
-	$name=utf8_encode($_GET['name']);
+
+    if (!filter_var($qEmail, FILTER_VALIDATE_EMAIL)) {
+        // RECEIVE E-MAIL WITH base64_encode for ~aesthetic reason~ 'hide' the email in the url, this is not really for your safety.
+        $qEmail = str_replace("","",base64_decode($qEmail));
+    }   
+	    $name=utf8_encode($qName);
 }
 ?>
 <html>
@@ -17,13 +22,8 @@ if (!$qEmail){
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
         <script src="https://code.jquery.com/jquery-1.x-git.min.js"></script>
-
-        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css"/>
-        <style>
-            .badge{ width:100%}
-        </style>
-
-        <script type="text/javascript" src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css"/>
+        <script type="text/javascript" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
         <script> 
         $(document).ready(function() {
                 $('#basicDataTable').dataTable( {
@@ -36,36 +36,37 @@ if (!$qEmail){
                 } );
             } );
         </script>
+        <style>
+            .badge{ width:100%}
+        </style>
     </head>
     <body>
         <div style="margin: 10px">
-            <p><a href="../index.php?a=add&email=<?=$qEmail?>&name=<?=$name?>" class="btn btn-primary btn-lg" target="_chamados">Abrir Chamado</a></p>
-            <!-- <p><a href="<?=$_SERVER[REQUEST_URI]?>&solved=1" class="btn btn-secondary btn-sm">Incluir chamados Resolvidos</a></p> -->
-            
-            
-            
+            <p><a href="../index.php?a=add&email=<?=$qEmail?>&name=<?=$name?>" class="btn btn-primary btn-lg" target="_chamados">Novo Chamado</a></p>
             <form name="form1" method="post" action="<?=$_SERVER[REQUEST_URI]?>"> 
                 <label><input type="radio" name="solved" <?php if ($solved == 1) { echo "checked value='0'"; } else {echo "value=1"; }  ?> onclick="submit()"> Exibir chamados resolvidos.</label>
             </form>
         </div>
-
         <table  class="table table-striped" id="basicDataTable">
-        <thead>
-            <tr bgcolor='#eeeeee'>
-            <th>Status</th>
-            <th>Categoria</th>
-            <th>Última interação</th><th>ID</th><th>Assunto</th><th>Respondido por</th><th>Mensagem</th><th>Ação</th>
-            </tr>
-        </thead>
+            <thead>
+                <tr style='background-color:#eeeeee'>
+                    <th>Status</th>
+                    <th>Categoria</th>
+                    <th>Última interação</th>
+                    <th>ID</th>
+                    <th>Assunto</th>
+                    <th>Respondido por</th>
+                    <th>Mensagem</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
         <tbody>
-        
-
 <?php
 /// CONNECTION AND OPTIONS
 require_once("config.php");
 
 if ($solved != 1){
-	$querySolved = " and tickets.status != 3";
+	$querySolved = " and tickets.status != $solvedIdIs";
 }
 
 $q = mysqli_query($conn, "SELECT
@@ -119,14 +120,13 @@ while ($d = mysqli_fetch_assoc($q)){
         $statusTxt =  '<span class="badge badge-dark">Acesse para conferir</span>';
 }
 	
-	$tamanhoMessage = 45;
-	$message = nl2br(substr(strip_tags($message),0,$tamanhoMessage)); 
+	$message = nl2br(substr(strip_tags($message),0,$lengthMessage)); 
 	$message = preg_replace('#(( ){0,}<br( {0,})(/{0,1})>){1,}$#i', '', $message); 
-	if (strlen($message)>$tamanhoMessage-1) { $message.='...'; } 
+	if (strlen($message)>$lengthMessage-1) { $message.='...'; } 
 	
 	
 echo "
-	<tr bgcolor='white'>
+	<tr>
         <td data-order='$statusOrder'>$statusTxt</td>
 		<td>$category</td>
         <td data-order='$lastchange'>".date("d/m/Y H:i", strtotime("$lastchange"))."</td>
@@ -134,14 +134,13 @@ echo "
         <td>$subject</td>
         <td>$name</td>
         <td>$message</td>
-		<td><a href='../ticket.php?track=$trackid&e=$email' class='btn btn-secondary btn-sm' target='_chamados'>Acessar Ticket</a></td>
+		<td><a href='../ticket.php?track=$trackid&e=$email' class='btn btn-secondary btn-sm' target='_chamados'>Abrir Ticket</a></td>
     </tr>
 ";
 
 }
 mysqli_close($conn);
 ?>
-
             </tbody>
         </table>
     </body>
