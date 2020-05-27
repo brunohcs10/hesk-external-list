@@ -4,7 +4,7 @@ $table_prefix = 'hesk_';
 $lengthMessage = 45; // Message Size
 $solvedIdIs = 3; // Resolved Status ID
 
-$_language = 'pt_BR';
+$_language = 'en'; // or pt_BR
 
 $conn = mysqli_connect("localhost", "user", "password", "db");
 if (!$conn) {
