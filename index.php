@@ -1,4 +1,7 @@
 <?php
+/// CONNECTION AND OPTIONS
+require_once("config.php");
+
 $qEmail = htmlspecialchars($_GET['q']);
 $qName = htmlspecialchars($_GET['name']);
 $solved = htmlspecialchars($_POST['solved']);
@@ -31,7 +34,7 @@ if (!isset($qEmail)){
                     "lengthMenu": [[10, 20, 50, 100, -1], [10, 20, 50, 100, "Tudo"]],
                     "order": [[ 2, "desc" ]],
                     "language": {
-                        "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
+                        "url": "<?=$_lang['datatable-translate']?>"
                     }
                 } );
             } );
@@ -42,28 +45,27 @@ if (!isset($qEmail)){
     </head>
     <body>
         <div style="margin: 10px">
-            <p><a href="../index.php?a=add&email=<?=$qEmail?>&name=<?=$name?>" class="btn btn-primary btn-lg" target="_chamados">Novo Chamado</a></p>
+            <p><a href="../index.php?a=add&email=<?=$qEmail?>&name=<?=$name?>" class="btn btn-primary btn-lg" target="_chamados"><?=$_lang['new-ticket']?></a></p>
             <form name="form1" method="post" action="<?=$_SERVER[REQUEST_URI]?>"> 
-                <label><input type="radio" name="solved" <?php if ($solved == 1) { echo "checked value='0'"; } else {echo "value=1"; }  ?> onclick="submit()"> Exibir chamados resolvidos.</label>
+                <label><input type="radio" name="solved" <?php if ($solved == 1) { echo "checked value='0'"; } else {echo "value=1"; }  ?> onclick="submit()"> <?=$_lang['display-resolved']?></label>
             </form>
         </div>
         <table  class="table table-striped" id="basicDataTable">
             <thead>
                 <tr style='background-color:#eeeeee'>
-                    <th>Status</th>
-                    <th>Categoria</th>
-                    <th>Última interação</th>
-                    <th>ID</th>
-                    <th>Assunto</th>
-                    <th>Respondido por</th>
-                    <th>Mensagem</th>
-                    <th>Ação</th>
+                    <th><?=$_lang['status']?></th>
+                    <th><?=$_lang['category']?></th>
+                    <th><?=$_lang['last-interaction']?></th>
+                    <th><?=$_lang['id']?></th>
+                    <th><?=$_lang['subject']?></th>
+                    <th><?=$_lang['reply-by']?></th>
+                    <th><?=$_lang['message']?></th>
+                    <th><?=$_lang['action']?></th>
                 </tr>
             </thead>
         <tbody>
 <?php
-/// CONNECTION AND OPTIONS
-require_once("config.php");
+
 
 if ($solved != 1){
 	$querySolved = " and tickets.status != $solvedIdIs";
@@ -93,31 +95,31 @@ while ($d = mysqli_fetch_assoc($q)){
 	
 	switch ($status) {
     case 0:
-        $statusTxt =  '<span class="badge badge-danger">Novo</span>';
+        $statusTxt =  '<span class="badge badge-danger">'.$_lang['type-status']['new'].'</span>';
 		$statusOrder = 4;
         break;
     case 1:
-        $statusTxt =  '<span class="badge badge-warning">Aguardando resposta</span>';
+        $statusTxt =  '<span class="badge badge-warning">'.$_lang['type-status']['waiting-reply'].'</span>';
 		$statusOrder = 2;
         break;
     case 2:
-        $statusTxt =  '<span class="badge badge-primary">Respondido</span>';
+        $statusTxt =  '<span class="badge badge-primary">'.$_lang['type-status']['replied'].'</span>';
 		$statusOrder = 0;
         break;
 	case 3:
-        $statusTxt =  '<span class="badge badge-success">Resolvido</span>';
+        $statusTxt =  '<span class="badge badge-success">'.$_lang['type-status']['resolved'].'</span>';
 		$statusOrder = 5;
         break;
     case 4:
-        $statusTxt =  '<span class="badge badge-info">Em progresso</span>';
+        $statusTxt =  '<span class="badge badge-info">'.$_lang['type-status']['in-progress'].'</span>';
 		$statusOrder = 1;
         break;
     case 5:
-        $statusTxt =  '<span class="badge badge-dark">Em espera</span>';
+        $statusTxt =  '<span class="badge badge-dark">'.$_lang['type-status']['on-hold'].'</span>';
 		$statusOrder = 3;
         break;
 	default:
-        $statusTxt =  '<span class="badge badge-dark">Acesse para conferir</span>';
+        $statusTxt =  '<span class="badge badge-dark">'.$_lang['type-status']['other'].'</span>';
 }
 	
 	$message = nl2br(substr(strip_tags($message),0,$lengthMessage)); 
@@ -134,7 +136,7 @@ echo "
         <td>$subject</td>
         <td>$name</td>
         <td>$message</td>
-		<td><a href='../ticket.php?track=$trackid&e=$email' class='btn btn-secondary btn-sm' target='_chamados'>Abrir Ticket</a></td>
+		<td><a href='../ticket.php?track=$trackid&e=$email' class='btn btn-secondary btn-sm' target='_chamados'>".$_lang['open-ticket']."</a></td>
     </tr>
 ";
 
