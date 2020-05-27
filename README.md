@@ -1,5 +1,7 @@
 # hesk-external-list
 
+## HESK Version: 2.8.4
+
 ## Atenção:
 
 *Ao usar esse script, o conteúdo dos tickets serão facilmente acessados por qualquer um que conheça os e-mails dos usuários.*
