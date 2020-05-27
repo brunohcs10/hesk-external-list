@@ -1,5 +1,7 @@
 <?php
-$table_prefix = 'hesk_';
+$table_prefix = 'hesk_'; // Prefix table DB
+
+$title_support = 'Hesk - My Site'; // Site Title
 
 $lengthMessage = 45; // Message Size
 $solvedIdIs = 3; // Resolved Status ID
