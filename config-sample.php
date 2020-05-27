@@ -8,6 +8,8 @@ if (!$conn) {
     exit;
 }
 
+$table_prefix = 'hesk_';
+
 
 $lengthMessage = 45; // Message Size
 $solvedIdIs = 3; // Resolved Status ID

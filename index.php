@@ -71,11 +71,11 @@ if ($solved != 1){
 
 $q = mysqli_query($conn, "SELECT
 	tickets.subject, tickets.trackid, tickets.lastchange, tickets.email,  tickets.status,
-	(select name from hesk_replies as replies where replyto = tickets.id order by replies.id desc limit 1) as name,
-    (select message from hesk_replies as replies where replyto = tickets.id order by replies.id desc limit 1) as message,
-	(select name from hesk_categories as replies where id = category limit 1) as category
+	(select name from ".$table_prefix."replies as replies where replyto = tickets.id order by replies.id desc limit 1) as name,
+    (select message from ".$table_prefix."replies as replies where replyto = tickets.id order by replies.id desc limit 1) as message,
+	(select name from ".$table_prefix."categories as replies where id = category limit 1) as category
 FROM
-hesk_tickets as tickets
+".$table_prefix."tickets as tickets
 WHERE
 tickets.email='$qEmail' 
 $querySolved
