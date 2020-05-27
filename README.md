@@ -14,3 +14,7 @@
 1. Instale dentro do diretorio do HESK (Recomendo criar o diretório /list)
 2. Renomeie config-sample.php para config.php
 3. Configure os dados de acesso do banco de dados em config.php
+
+## Screenshot
+
+![](/images/print/1-list.png)
