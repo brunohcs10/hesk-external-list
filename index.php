@@ -10,11 +10,16 @@ if (!isset($qEmail)){
     echo "Error";
 	die;
 } else {
-
+	$validMail = TRUE;
     if (!filter_var($qEmail, FILTER_VALIDATE_EMAIL)) {
         // RECEIVE E-MAIL WITH base64_encode for ~aesthetic reason~ 'hide' the email in the url, this is not really for your safety.
         $qEmail = str_replace("","",base64_decode($qEmail));
+		
+		if (!filter_var($qEmail, FILTER_VALIDATE_EMAIL)){
+			$validMail = FALSE;
+		}
     }   
+		
 	    $name=utf8_encode($qName);
 }
 ?>
@@ -45,6 +50,16 @@ if (!isset($qEmail)){
         </style>
     </head>
     <body>
+		<?php
+			if (!$validMail){
+				echo '
+				<div class="alert alert-warning" role="alert">
+				  Invalid Email
+				</div>
+				';
+				die;
+			}
+		?>
         <div style="margin: 10px">
             <p><a href="../index.php?a=add&email=<?=$qEmail?>&name=<?=$name?>" class="btn btn-primary btn-lg" target="_chamados"><?=$_lang['new-ticket']?></a></p>
             <form name="form1" method="post" action="<?=$_SERVER[REQUEST_URI]?>"> 
