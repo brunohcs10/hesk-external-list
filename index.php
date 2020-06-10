@@ -80,7 +80,7 @@ $q = mysqli_query($conn, "SELECT
 FROM
 ".$table_prefix."tickets as tickets
 WHERE
-tickets.email='$qEmail' 
+tickets.email like '%$qEmail%' 
 $querySolved
 order by lastchange desc");
 
