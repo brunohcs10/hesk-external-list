@@ -6,9 +6,9 @@ $qEmail = htmlspecialchars($_GET['q']);
 $qName = htmlspecialchars($_GET['name']);
 $solved = htmlspecialchars($_POST['solved']);
 
-if (!isset($qEmail)){
-    echo "Error";
-	die;
+if (!$qEmail){
+	// Set $validMail=TRUE and the complete list will appear if you do not enter any email. NOT RECOMMENDED
+	$validMail = FALSE;
 } else {
 	$validMail = TRUE;
     if (!filter_var($qEmail, FILTER_VALIDATE_EMAIL)) {
@@ -19,8 +19,7 @@ if (!isset($qEmail)){
 			$validMail = FALSE;
 		}
     }   
-		
-	    $name=utf8_encode($qName);
+	$name=utf8_encode($qName);
 }
 ?>
 <html>
@@ -46,7 +45,7 @@ if (!isset($qEmail)){
             } );
         </script>
         <style>
-            .badge{ width:100%}
+            .badge{ width:100%; }
         </style>
     </head>
     <body>
@@ -81,7 +80,6 @@ if (!isset($qEmail)){
             </thead>
         <tbody>
 <?php
-
 
 if ($solved != 1){
 	$querySolved = " and tickets.status != $solvedIdIs";
@@ -141,7 +139,6 @@ while ($d = mysqli_fetch_assoc($q)){
 	$message = nl2br(substr(strip_tags($message),0,$lengthMessage)); 
 	$message = preg_replace('#(( ){0,}<br( {0,})(/{0,1})>){1,}$#i', '', $message); 
 	if (strlen($message)>$lengthMessage-1) { $message.='...'; } 
-	
 	
 echo "
 	<tr>
