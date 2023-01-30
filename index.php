@@ -60,7 +60,30 @@ if (!$qEmail){
 			}
 		?>
         <div style="margin: 10px">
-            <p><a href="../index.php?a=add&email=<?=$qEmail?>&name=<?=$name?>" class="btn btn-primary btn-lg" target="_chamados"><?=$_lang['new-ticket']?></a></p>
+            <p><a href="../index.php?a=add&email=<?=$qEmail?>&name=<?=$name?>
+								&custom1=<?=htmlspecialchars($_GET['custom1'])?>
+								&custom2=<?=htmlspecialchars($_GET['custom2'])?>
+								&custom3=<?=htmlspecialchars($_GET['custom3'])?>
+								&custom4=<?=htmlspecialchars($_GET['custom4'])?>
+								&custom5=<?=htmlspecialchars($_GET['custom5'])?>
+								&custom6=<?=htmlspecialchars($_GET['custom6'])?>
+								&custom7=<?=htmlspecialchars($_GET['custom7'])?>
+								&custom8=<?=htmlspecialchars($_GET['custom8'])?>
+								&custom9=<?=htmlspecialchars($_GET['custom9'])?>
+								&custom10=<?=htmlspecialchars($_GET['custom10'])?>
+								&custom11=<?=htmlspecialchars($_GET['custom11'])?>
+								&custom12=<?=htmlspecialchars($_GET['custom12'])?>
+								&custom13=<?=htmlspecialchars($_GET['custom13'])?>
+								&custom14=<?=htmlspecialchars($_GET['custom14'])?>
+								&custom15=<?=htmlspecialchars($_GET['custom15'])?>
+								&custom16=<?=htmlspecialchars($_GET['custom16'])?>
+								&custom17=<?=htmlspecialchars($_GET['custom17'])?>
+								&custom18=<?=htmlspecialchars($_GET['custom18'])?>
+								&custom19=<?=htmlspecialchars($_GET['custom19'])?>
+								&custom20=<?=htmlspecialchars($_GET['custom20'])?>
+								&custom21=<?=htmlspecialchars($_GET['custom21'])?>
+								&custom22=<?=htmlspecialchars($_GET['custom22'])?>
+								" class="btn btn-primary btn-lg" target="_chamados"><?=$_lang['new-ticket']?></a></p>
             <form name="form1" method="post" action="<?=$_SERVER[REQUEST_URI]?>"> 
                 <label><input type="radio" name="solved" <?php if ($solved == 1) { echo "checked value='0'"; } else {echo "value=1"; }  ?> onclick="submit()"> <?=$_lang['display-resolved']?></label>
             </form>
