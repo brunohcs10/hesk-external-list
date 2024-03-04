@@ -119,6 +119,7 @@ if ($solved != 1){
 $q = mysqli_query($conn, "SELECT
 	tickets.subject, tickets.trackid, tickets.lastchange, tickets.email,  tickets.status,
 	(select name from ".$table_prefix."replies as replies where replyto = tickets.id order by replies.id desc limit 1) as name,
+	(select replies.read from ".$table_prefix."replies as replies where replyto = tickets.id order by replies.id desc limit 1) as 'read',	
     (select message from ".$table_prefix."replies as replies where replyto = tickets.id order by replies.id desc limit 1) as message,
 	(select name from ".$table_prefix."categories as replies where id = category limit 1) as category
 FROM
@@ -132,6 +133,7 @@ while ($d = mysqli_fetch_assoc($q)){
 	$trackid = utf8_encode($d['trackid']);
 	$subject = utf8_encode($d['subject']);
 	$name = utf8_encode($d['name']);
+	$read = utf8_encode($d['read']);
 	$email = utf8_encode($d['email']);
 	$message = utf8_encode($d['message']);
 	$lastchange = utf8_encode($d['lastchange']);
@@ -171,10 +173,15 @@ while ($d = mysqli_fetch_assoc($q)){
 	$message = preg_replace('#(( ){0,}<br( {0,})(/{0,1})>){1,}$#i', '', $message); 
 	if (strlen($message)>$lengthMessage-1) { $message.='...'; } 
 	
+	$readIcon = '<img src="assets/img/read.gif" title="Unread">';
+	if ($read == 1){
+		$readIcon = '<img src="assets/img/read.gif" style="opacity : 0.1;" title="Read">';
+	}
+
 echo "
 	<tr>
         <td data-order='$statusOrder'>$statusTxt</td>
-		<td>$category</td>
+		<td>$readIcon $category</td>
         <td data-order='$lastchange'>".date("d/m/Y H:i", strtotime("$lastchange"))."</td>
 		<td>$trackid</td>
         <td>$subject</td>
