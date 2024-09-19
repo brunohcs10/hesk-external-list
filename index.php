@@ -4,7 +4,10 @@ require_once("config.php");
 
 $qEmail = htmlspecialchars($_GET['q']);
 $qName = htmlspecialchars($_GET['name']);
-$solved = htmlspecialchars($_POST['solved']);
+
+if ($_POST['solved'] == 1 or $_GET['solved'] == 1){
+	$solved = 1;
+}
 
 if (!$qEmail){
 	// Set $validMail=TRUE and the complete list will appear if you do not enter any email. NOT RECOMMENDED
