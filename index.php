@@ -116,32 +116,104 @@ if (!$qEmail){
 <?php
 
 if ($solved != 1){
-	$querySolved = " and tickets.status != $solvedIdIs";
+	$querySolved = "`ticket`.`status` != 3 AND";
 }
 
-$q = mysqli_query($conn, "SELECT
-	tickets.subject, tickets.trackid, tickets.lastchange, tickets.email,  tickets.status,
-	(select name from ".$table_prefix."replies as replies where replyto = tickets.id order by replies.id desc limit 1) as name,
-	(select replies.read from ".$table_prefix."replies as replies where replyto = tickets.id order by replies.id desc limit 1) as 'read',	
-    (select message from ".$table_prefix."replies as replies where replyto = tickets.id order by replies.id desc limit 1) as message,
-	(select name from ".$table_prefix."categories as replies where id = category limit 1) as category
+$q = mysqli_query($conn, "SELECT 
+    `ticket`.`status` AS `status`,
+    
+	    COALESCE(
+        (SELECT 
+                `dt`
+         FROM
+                `".$table_prefix."replies`
+         WHERE
+                `replyto` = `ticket`.`id`
+         ORDER BY `id` DESC
+         LIMIT 1),
+        `ticket`.`lastchange`
+    ) AS `lastchange`,
+	
+    `ticket`.`category` AS `category_id`,
+    `ticket`.`id` AS `ticket_id`,
+    `ticket`.`subject` AS `subject`,
+    `ticket`.`trackid`,
+    (SELECT `name` FROM `".$table_prefix."categories` WHERE `id` = `ticket`.`category`) AS `category`,
+     COALESCE(
+        (SELECT 
+                CASE 
+                    WHEN `customer_id` IS NOT NULL THEN 
+                        (SELECT `name` 
+                         FROM `".$table_prefix."customers` 
+                         WHERE `id` = `".$table_prefix."replies`.`customer_id`)
+                    WHEN `staffid` IS NOT NULL THEN 
+                        (SELECT `name` 
+                         FROM `".$table_prefix."users` 
+                         WHERE `id` = `".$table_prefix."replies`.`staffid`)
+                    ELSE NULL
+                END
+         FROM
+                `".$table_prefix."replies`
+         WHERE
+                `replyto` = `ticket`.`id`
+         ORDER BY `id` DESC
+         LIMIT 1),
+        (SELECT `customer`.`name`
+         FROM `".$table_prefix."ticket_to_customer` AS `ticket_customer`
+         INNER JOIN `".$table_prefix."customers` AS `customer` 
+         ON `ticket_customer`.`customer_id` = `customer`.`id`
+         WHERE `ticket_customer`.`ticket_id` = `ticket`.`id` 
+           AND `ticket_customer`.`customer_type` = 'REQUESTER'
+         LIMIT 1)
+    ) AS `last_replied_by`,
+    COALESCE(
+        (SELECT 
+                `message`
+         FROM
+                `".$table_prefix."replies`
+         WHERE
+                `replyto` = `ticket`.`id`
+         ORDER BY `id` DESC
+         LIMIT 1),
+        `ticket`.`message`
+    ) AS `last_message`,
+    COALESCE(
+        (SELECT 
+                `read`
+         FROM
+                `".$table_prefix."replies`
+         WHERE
+                `replyto` = `ticket`.`id`
+         ORDER BY `id` DESC
+         LIMIT 1),
+        0  -- Se não houver resposta, assume que a última mensagem não foi lida
+    ) AS `last_reply_read`
 FROM
-".$table_prefix."tickets as tickets
+    `".$table_prefix."tickets` AS `ticket`
 WHERE
-tickets.email like '%$qEmail%' 
-$querySolved
-order by lastchange desc");
+    $querySolved
+     `ticket`.`id` IN (SELECT 
+                              `ticket_id`
+                          FROM
+                              `".$table_prefix."ticket_to_customer` AS `ticket_to_customer`
+                                  INNER JOIN
+                              `".$table_prefix."customers` AS `customer` 
+                              ON `ticket_to_customer`.`customer_id` = `customer`.`id`
+                          WHERE
+                              `customer`.`email` LIKE '%$qEmail%')
+ORDER BY `ticket`.`id` DESC;
+");
 
 while ($d = mysqli_fetch_assoc($q)){
-	$trackid = utf8_encode($d['trackid']);
-	$subject = utf8_encode($d['subject']);
-	$name = utf8_encode($d['name']);
-	$read = utf8_encode($d['read']);
-	$email = utf8_encode($d['email']);
-	$message = utf8_encode($d['message']);
-	$lastchange = utf8_encode($d['lastchange']);
-	$status = utf8_encode($d['status']);
-	$category = utf8_encode($d['category']);
+	$trackid = $d['trackid'];
+	$subject = $d['subject'];
+	$name = $d['last_replied_by'];
+	$read = $d['last_reply_read'];
+	$email = $d['email'];
+	$message = $d['last_message'];
+	$lastchange = $d['lastchange'];
+	$status = $d['status'];
+	$category = $d['category'];
 	
 	switch ($status) {
     case 0:
