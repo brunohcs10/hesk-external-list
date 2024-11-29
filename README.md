@@ -1,6 +1,7 @@
 # hesk-external-list
 
-#### HESK Version: 2.8.4 and 3.3.x
+#### HESK Version Required: 3.5.x
+#### ~~HESK Version: 2.8.4 and 3.3.x~~ 
 
 ## Atenção:
 
