@@ -23,16 +23,42 @@ if (!$qEmail){
     }   
 }
 
-$q = mysqli_query($conn, "SELECT count(*) as total
- 	FROM
-        ".$table_prefix."replies as rep,
-		".$table_prefix."tickets as tic
-    where
-		`rep`.`read` = '0'
-        and tic.id = rep.replyto
-        and tic.email like '%$qEmail%'
-		and tic.status != 3
-        and tic.closedby is NULL");
+$q = mysqli_query($conn, "SELECT 
+		    COUNT(*) AS `total`
+		FROM
+		    `".$table_prefix."tickets` AS `ticket`
+		WHERE
+		    `ticket`.`status` != 3 -- Apenas tickets em aberto
+		    AND EXISTS (
+			SELECT 
+			    1
+			FROM
+			    `".$table_prefix."replies` AS `last_reply`
+			WHERE
+			    `last_reply`.`replyto` = `ticket`.`id`
+			    AND (`last_reply`.`staffid` IS NOT NULL and `last_reply`.`staffid` != 0)
+			    AND `last_reply`.`read` = '0'
+			    AND NOT EXISTS (
+				SELECT 
+				    1
+				FROM
+				    `".$table_prefix."replies` AS `newer_reply`
+				WHERE
+				    `newer_reply`.`replyto` = `ticket`.`id`
+				    AND `newer_reply`.`id` > `last_reply`.`id`
+			    )
+		    )
+		    AND `ticket`.`id` IN (
+			SELECT 
+			    `ticket_id`
+			FROM
+			    `".$table_prefix."ticket_to_customer` AS `ticket_to_customer`
+				INNER JOIN
+			    `".$table_prefix."customers` AS `customer`
+				ON `ticket_to_customer`.`customer_id` = `customer`.`id`
+			WHERE
+			    `customer`.`email` LIKE '%$qEmail%'
+		    );");
 
 	$d = mysqli_fetch_assoc($q);
 
