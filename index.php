@@ -173,6 +173,7 @@ $q = mysqli_query($conn, "SELECT
                 `".$table_prefix."replies`
          WHERE
                 `replyto` = `ticket`.`id`
+		and (`staffid` is not null and `staffid` != '0')
          ORDER BY `id` DESC
          LIMIT 1),
         `ticket`.`message`
