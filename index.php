@@ -2,10 +2,11 @@
 /// CONNECTION AND OPTIONS
 require_once("config.php");
 
-$qEmail = htmlspecialchars($_GET['q']);
-$qName = htmlspecialchars($_GET['name']);
+$qEmail = htmlspecialchars($_GET['q'] ?? '');
+$qName = htmlspecialchars($_GET['name'] ?? '');
 
-if ($_POST['solved'] == 1 or $_GET['solved'] == 1){
+$solved = 0;
+if (($_POST['solved'] ?? 0) == 1 or ($_GET['solved'] ?? 0) == 1){
 	$solved = 1;
 }
 
@@ -22,7 +23,7 @@ if (!$qEmail){
 			$validMail = FALSE;
 		}
     }   
-	$name=utf8_encode($qName);
+	$name=mb_convert_encoding($qName, 'UTF-8', 'ISO-8859-1');
 }
 ?>
 <html>
@@ -71,31 +72,14 @@ if (!$qEmail){
 			}
 		?>
         <div style="margin: 10px">
-            <p><a href="../index.php?a=add&email=<?=$qEmail?>&name=<?=$name?>
-								&custom1=<?=htmlspecialchars($_GET['custom1'])?>
-								&custom2=<?=htmlspecialchars($_GET['custom2'])?>
-								&custom3=<?=htmlspecialchars($_GET['custom3'])?>
-								&custom4=<?=htmlspecialchars($_GET['custom4'])?>
-								&custom5=<?=htmlspecialchars($_GET['custom5'])?>
-								&custom6=<?=htmlspecialchars($_GET['custom6'])?>
-								&custom7=<?=htmlspecialchars($_GET['custom7'])?>
-								&custom8=<?=htmlspecialchars($_GET['custom8'])?>
-								&custom9=<?=htmlspecialchars($_GET['custom9'])?>
-								&custom10=<?=htmlspecialchars($_GET['custom10'])?>
-								&custom11=<?=htmlspecialchars($_GET['custom11'])?>
-								&custom12=<?=htmlspecialchars($_GET['custom12'])?>
-								&custom13=<?=htmlspecialchars($_GET['custom13'])?>
-								&custom14=<?=htmlspecialchars($_GET['custom14'])?>
-								&custom15=<?=htmlspecialchars($_GET['custom15'])?>
-								&custom16=<?=htmlspecialchars($_GET['custom16'])?>
-								&custom17=<?=htmlspecialchars($_GET['custom17'])?>
-								&custom18=<?=htmlspecialchars($_GET['custom18'])?>
-								&custom19=<?=htmlspecialchars($_GET['custom19'])?>
-								&custom20=<?=htmlspecialchars($_GET['custom20'])?>
-								&custom21=<?=htmlspecialchars($_GET['custom21'])?>
-								&custom22=<?=htmlspecialchars($_GET['custom22'])?>
-								" class="btn btn-primary btn-lg" target="_chamados"><?=$_lang['new-ticket']?></a></p>
-            <form name="form1" method="post" action="<?=$_SERVER[REQUEST_URI]?>"> 
+            <?php
+            $params = ['a' => 'add', 'email' => $qEmail, 'name' => $name];
+            for ($i = 1; $i <= 22; $i++) {
+                $params["custom$i"] = $_GET["custom$i"] ?? '';
+            }
+            ?>
+            <p><a href="../index.php?<?=htmlspecialchars(http_build_query($params))?>" class="btn btn-primary btn-lg" target="_chamados"><?=$_lang['new-ticket']?></a></p>
+            <form name="form1" method="post" action="<?=htmlspecialchars($_SERVER['REQUEST_URI'])?>"> 
                 <label><input type="radio" name="solved" <?php if ($solved == 1) { echo "checked value='0'"; } else {echo "value=1"; }  ?> onclick="submit()"> <?=$_lang['display-resolved']?></label>
             </form>
         </div>
@@ -115,6 +99,7 @@ if (!$qEmail){
         <tbody>
 <?php
 
+$querySolved = '';
 if ($solved != 1){
 	$querySolved = "`ticket`.`status` != 3 AND";
 }
@@ -201,7 +186,7 @@ WHERE
                               `".$table_prefix."customers` AS `customer` 
                               ON `ticket_to_customer`.`customer_id` = `customer`.`id`
                           WHERE
-                              `customer`.`email` LIKE '%$qEmail%')
+                              `customer`.`email` LIKE '%".mysqli_real_escape_string($conn, $qEmail)."%')
 ORDER BY `ticket`.`id` DESC;
 ");
 
@@ -210,7 +195,7 @@ while ($d = mysqli_fetch_assoc($q)){
 	$subject = $d['subject'];
 	$name = $d['last_replied_by'];
 	$read = $d['last_reply_read'];
-	$email = $d['email'];
+	$email = $qEmail;
 	$message = $d['last_message'];
 	$lastchange = $d['lastchange'];
 	$status = $d['status'];
@@ -243,6 +228,7 @@ while ($d = mysqli_fetch_assoc($q)){
         break;
 	default:
         $statusTxt =  '<span class="badge badge-dark">'.$_lang['type-status']['other'].'</span>';
+		$statusOrder = 6;
 }
 	
 	$message = nl2br(substr(strip_tags($message),0,$lengthMessage)); 
